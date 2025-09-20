@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SRMU Attendance Portal</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animation.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div>SRMU Attendance Tool</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="templates/about.html">About</a></li>
+      <li><a href="templates/info.html">Info</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <h1>Welcome to the SRMU Attendance Tool</h1>
+      <p>Quickly fetch your official attendance report faster and securely</p>
+    </section>
+
+    <div class="form-section">
+  <h2>Login to Fetch Attendance</h2>
+  <div id="error" class="error" style="display:none;"></div>
+
+  <form id="attendanceForm">
+    <label for="roll_no">University Roll Number</label>
+    <input type="text" id="roll_no" name="roll_no" placeholder="Enter Roll Number">
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" placeholder="Enter Password">
+
+    <label for="term">Term</label>
+    <input type="text" id="term" name="term" placeholder="Enter Term (e.g., 2501)">
+
+    <button type="submit">Fetch Attendance</button>
+  </form>
+
+  <!-- Log box will appear to the right -->
+  <div id="logContainer" class="log-container">
+    <div id="logs"></div>
+  </div>
+</div>
+
+</section>
+
+
+    <div id="popup" class="popup">
+      <div class="popup-content">
+        <span class="close-btn">&times;</span>
+        <p>Please fill all required fields!</p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 SRMU Attendance Tool</p>
+  </footer>
+
+<script>
+const form = document.getElementById('attendanceForm');
+const popup = document.getElementById('popup');
+const closeBtn = document.querySelector('.close-btn');
+const errorDiv = document.getElementById('error');
+const logContainer = document.getElementById('logContainer');
+const logsDiv = document.getElementById('logs');
+const API_BASE = "http://100.26.180.194:5500"; 
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const roll = document.getElementById('roll_no').value.trim();
+  const pass = document.getElementById('password').value.trim();
+  const term = document.getElementById('term').value.trim();
+
+  if (!roll || !pass || !term) {
+    popup.querySelector('p').textContent = "Please fill all required fields!";
+    popup.style.display = 'flex';
+    return;
+  }
+
+  form.classList.add('slide-left');
+  logContainer.style.display = 'block';
+  logsDiv.innerHTML = "";
+  errorDiv.style.display = 'none';
+
+  const addLog = (text) => {
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.innerHTML = `<span class="loader"></span><span>${text}</span>`;
+    logsDiv.appendChild(entry);
+    logsDiv.scrollTop = logsDiv.scrollHeight;
+    return entry.querySelector('.loader');
+  };
+
+  try {
+    // Step 1: Logging in
+    const loader1 = addLog("Logging in with roll number and password...");
+
+    // API call immediately
+    const response = await fetch(`${API_BASE}/api/check`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ roll_no: roll, password: pass, term: term })
+    });
+    const data = await response.json();
+
+    if (data.status === "success" && data.pdf_url) {
+      loader1.classList.replace('loader','checkmark');
+
+      const loader2 = addLog("Opening student portal...");
+      await new Promise(r => setTimeout(r, 1500));
+      loader2.classList.replace('loader','checkmark');
+
+      const loader3 = addLog("Going to Attendance report...");
+      await new Promise(r => setTimeout(r, 3000));
+      loader3.classList.replace('loader','checkmark');
+
+      const loader4 = addLog("Generating the PDF...");
+      await new Promise(r => setTimeout(r, 1000));
+      loader4.classList.replace('loader','checkmark');
+
+      window.open(`${API_BASE}${data.pdf_url}`, "_blank");
+      const loader5 = addLog("Attendance fetched successfully!");
+      loader5.classList.replace('loader','checkmark'); 
+
+  setTimeout(() => {
+    form.reset();                 
+    form.classList.remove('slide-left'); 
+    
+    const logContainer = document.getElementById('logContainer'); 
+    if (logContainer) logContainer.remove(); 
+  }, 3000);
+    } else {
+      loader1.classList.replace('loader','checkmark');
+      addLog("Error: Invalid roll number or password!");
+      throw new Error(data.message || "Invalid credentials");
+    }
+  } catch (err) {
+    console.error(err);
+    errorDiv.textContent = err.message || "Server not reachable";
+    errorDiv.style.display = "block";
+  } finally {
+    setTimeout(() => form.classList.remove('slide-left'), 2000);
+  }
+});
+
+// Popup close
+closeBtn.addEventListener('click', () => popup.style.display = 'none');
+window.addEventListener('click', (e) => { if (e.target === popup) popup.style.display = 'none'; });
+</script>
+
+</body>
+</html>
