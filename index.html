@@ -103,7 +103,7 @@ form.addEventListener('submit', async (e) => {
     const loader1 = addLog("Logging in with roll number and password...");
 
     // API call with relative path for Vercel
-    const response = await fetch(`/api/check`, {
+    const response = await fetch(`${API_BASE}/api/check`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ roll_no: roll, password: pass, term: term })
@@ -163,3 +163,4 @@ window.addEventListener('click', (e) => { if (e.target === popup) popup.style.di
 
 </body>
 </html>
+
