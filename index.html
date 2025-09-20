@@ -67,9 +67,7 @@ const closeBtn = document.querySelector('.close-btn');
 const errorDiv = document.getElementById('error');
 const logContainer = document.getElementById('logContainer');
 const logsDiv = document.getElementById('logs');
-
-// Use your actual backend URL
-const API_BASE = "http://100.26.180.194:5500";
+const API_BASE = "https://100.26.180.194:5500";
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -102,21 +100,13 @@ form.addEventListener('submit', async (e) => {
     // Step 1: Logging in
     const loader1 = addLog("Logging in with roll number and password...");
 
-    // API call with correct backend URL
+    // API call immediately
     const response = await fetch(`${API_BASE}/api/check`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ roll_no: roll, password: pass, term: term })
     });
-    
-    console.log("Response status:", response.status);
-    
-    if (!response.ok) {
-      throw new Error(`Server error: ${response.status}`);
-    }
-    
     const data = await response.json();
-    console.log("Response data:", data);
 
     if (data.status === "success" && data.pdf_url) {
       loader1.classList.replace('loader','checkmark');
@@ -133,27 +123,28 @@ form.addEventListener('submit', async (e) => {
       await new Promise(r => setTimeout(r, 1000));
       loader4.classList.replace('loader','checkmark');
 
-      // Open PDF - make sure the URL is complete
-      const pdfFullUrl = data.pdf_url.startsWith('http') ? data.pdf_url : `${API_BASE}${data.pdf_url}`;
-      window.open(pdfFullUrl, "_blank");
-      
+      window.open(`${API_BASE}${data.pdf_url}`, "_blank");
       const loader5 = addLog("Attendance fetched successfully!");
       loader5.classList.replace('loader','checkmark'); 
 
-      setTimeout(() => {
-        form.reset();                 
-        form.classList.remove('slide-left'); 
-        logContainer.style.display = 'none';
-      }, 3000);
+  setTimeout(() => {
+    form.reset();                 
+    form.classList.remove('slide-left'); 
+    
+    const logContainer = document.getElementById('logContainer'); 
+    if (logContainer) logContainer.remove(); 
+  }, 3000);
     } else {
-      loader1.classList.replace('loader','error-mark');
-      addLog("Error: " + (data.message || "Invalid credentials"));
+      loader1.classList.replace('loader','checkmark');
+      addLog("Error: Invalid roll number or password!");
       throw new Error(data.message || "Invalid credentials");
     }
   } catch (err) {
-    console.error("Error details:", err);
+    console.error(err);
     errorDiv.textContent = err.message || "Server not reachable";
     errorDiv.style.display = "block";
+  } finally {
+    setTimeout(() => form.classList.remove('slide-left'), 2000);
   }
 });
 
@@ -164,4 +155,3 @@ window.addEventListener('click', (e) => { if (e.target === popup) popup.style.di
 
 </body>
 </html>
-
