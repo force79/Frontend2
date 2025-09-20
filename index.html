@@ -68,8 +68,8 @@ const errorDiv = document.getElementById('error');
 const logContainer = document.getElementById('logContainer');
 const logsDiv = document.getElementById('logs');
 
-// Use relative paths for Vercel deployment
-const API_BASE = ""; // Empty for relative paths
+// Use your actual backend URL
+const API_BASE = "https://backend2-eight-alpha.vercel.app";
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -102,18 +102,21 @@ form.addEventListener('submit', async (e) => {
     // Step 1: Logging in
     const loader1 = addLog("Logging in with roll number and password...");
 
-    // API call with relative path for Vercel
+    // API call with correct backend URL
     const response = await fetch(`${API_BASE}/api/check`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ roll_no: roll, password: pass, term: term })
     });
     
+    console.log("Response status:", response.status);
+    
     if (!response.ok) {
       throw new Error(`Server error: ${response.status}`);
     }
     
     const data = await response.json();
+    console.log("Response data:", data);
 
     if (data.status === "success" && data.pdf_url) {
       loader1.classList.replace('loader','checkmark');
@@ -130,17 +133,17 @@ form.addEventListener('submit', async (e) => {
       await new Promise(r => setTimeout(r, 1000));
       loader4.classList.replace('loader','checkmark');
 
-      // Open PDF with relative URL
-      window.open(data.pdf_url, "_blank");
+      // Open PDF - make sure the URL is complete
+      const pdfFullUrl = data.pdf_url.startsWith('http') ? data.pdf_url : `${API_BASE}${data.pdf_url}`;
+      window.open(pdfFullUrl, "_blank");
+      
       const loader5 = addLog("Attendance fetched successfully!");
       loader5.classList.replace('loader','checkmark'); 
 
       setTimeout(() => {
         form.reset();                 
         form.classList.remove('slide-left'); 
-        
-        const logContainer = document.getElementById('logContainer'); 
-        if (logContainer) logContainer.style.display = 'none';
+        logContainer.style.display = 'none';
       }, 3000);
     } else {
       loader1.classList.replace('loader','error-mark');
@@ -148,11 +151,9 @@ form.addEventListener('submit', async (e) => {
       throw new Error(data.message || "Invalid credentials");
     }
   } catch (err) {
-    console.error(err);
+    console.error("Error details:", err);
     errorDiv.textContent = err.message || "Server not reachable";
     errorDiv.style.display = "block";
-  } finally {
-    setTimeout(() => form.classList.remove('slide-left'), 2000);
   }
 });
 
@@ -163,4 +164,3 @@ window.addEventListener('click', (e) => { if (e.target === popup) popup.style.di
 
 </body>
 </html>
-
