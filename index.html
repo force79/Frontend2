@@ -67,7 +67,9 @@ const closeBtn = document.querySelector('.close-btn');
 const errorDiv = document.getElementById('error');
 const logContainer = document.getElementById('logContainer');
 const logsDiv = document.getElementById('logs');
-const API_BASE = "http://100.26.180.194:5500";
+
+// Use relative paths for Vercel deployment
+const API_BASE = ""; // Empty for relative paths
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -100,12 +102,17 @@ form.addEventListener('submit', async (e) => {
     // Step 1: Logging in
     const loader1 = addLog("Logging in with roll number and password...");
 
-    // API call immediately
-    const response = await fetch(`${API_BASE}/api/check`, {
+    // API call with relative path for Vercel
+    const response = await fetch(`/api/check`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ roll_no: roll, password: pass, term: term })
     });
+    
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
+    }
+    
     const data = await response.json();
 
     if (data.status === "success" && data.pdf_url) {
@@ -123,20 +130,21 @@ form.addEventListener('submit', async (e) => {
       await new Promise(r => setTimeout(r, 1000));
       loader4.classList.replace('loader','checkmark');
 
-      window.open(`${API_BASE}${data.pdf_url}`, "_blank");
+      // Open PDF with relative URL
+      window.open(data.pdf_url, "_blank");
       const loader5 = addLog("Attendance fetched successfully!");
       loader5.classList.replace('loader','checkmark'); 
 
-  setTimeout(() => {
-    form.reset();                 
-    form.classList.remove('slide-left'); 
-    
-    const logContainer = document.getElementById('logContainer'); 
-    if (logContainer) logContainer.remove(); 
-  }, 3000);
+      setTimeout(() => {
+        form.reset();                 
+        form.classList.remove('slide-left'); 
+        
+        const logContainer = document.getElementById('logContainer'); 
+        if (logContainer) logContainer.style.display = 'none';
+      }, 3000);
     } else {
-      loader1.classList.replace('loader','checkmark');
-      addLog("Error: Invalid roll number or password!");
+      loader1.classList.replace('loader','error-mark');
+      addLog("Error: " + (data.message || "Invalid credentials"));
       throw new Error(data.message || "Invalid credentials");
     }
   } catch (err) {
