@@ -68,7 +68,6 @@ const errorDiv = document.getElementById('error');
 const logContainer = document.getElementById('logContainer');
 const logsDiv = document.getElementById('logs');
 
-// ✅ Use one constant name everywhere
 const API_BASE = "https://e505e9c2cf26.ngrok-free.app";
 
 form.addEventListener('submit', async (e) => {
@@ -98,11 +97,12 @@ form.addEventListener('submit', async (e) => {
     return entry.querySelector('.loader');
   };
 
+  // ✅ Open the new tab immediately to avoid popup blocker
+  const pdfWindow = window.open("", "_blank");
+
   try {
-    // Step 1: Logging in
     const loader1 = addLog("Logging in with roll number and password...");
 
-    // API call
     const response = await fetch(`${API_BASE}/api/check`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -126,15 +126,15 @@ form.addEventListener('submit', async (e) => {
       await new Promise(r => setTimeout(r, 1000));
       loader4.classList.replace('loader','checkmark');
 
-      // Open the generated PDF
-      window.open(`${API_BASE}${data.pdf_url}`, "_blank");
+      // ✅ Set the PDF URL in the new tab
+      pdfWindow.location.href = `${API_BASE}${data.pdf_url}`;
 
       const loader5 = addLog("Attendance fetched successfully!");
       loader5.classList.replace('loader','checkmark'); 
 
       setTimeout(() => {
-        form.reset();                 
-        form.classList.remove('slide-left'); 
+        form.reset();
+        form.classList.remove('slide-left');
         logContainer.style.display = 'none';
       }, 3000);
     } else {
@@ -146,6 +146,9 @@ form.addEventListener('submit', async (e) => {
     console.error(err);
     errorDiv.textContent = err.message || "Server not reachable";
     errorDiv.style.display = "block";
+
+    // If PDF tab was opened but error occurred, close it
+    if (pdfWindow) pdfWindow.close();
   } finally {
     setTimeout(() => form.classList.remove('slide-left'), 2000);
   }
@@ -161,5 +164,6 @@ window.addEventListener('click', (e) => {
 
 </body>
 </html>
+
 
 
