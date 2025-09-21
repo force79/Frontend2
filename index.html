@@ -124,14 +124,21 @@ form.addEventListener('submit', async (e) => {
       await new Promise(r => setTimeout(r, 1000));
       loader4.classList.replace('loader','checkmark');
 
-      // ✅ Trigger download directly without opening new tab
+      // ✅ Fetch the PDF as a Blob and download it
+      const fileResp = await fetch(`${API_BASE}${data.pdf_url}`);
+      if (!fileResp.ok) throw new Error("Failed to fetch PDF");
+
+      const blob = await fileResp.blob();
+      const url = window.URL.createObjectURL(blob);
+
       const a = document.createElement("a");
-      a.href = `${API_BASE}${data.pdf_url}`;
-      a.style.display = "none";
-      a.setAttribute("download", ""); // lets browser use original filename
+      a.href = url;
+      a.download = "SRMU-ATTENDANCE.pdf"; // use the backend’s name
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+
+      window.URL.revokeObjectURL(url);
 
       const loader5 = addLog("Attendance fetched successfully!");
       loader5.classList.replace('loader','checkmark'); 
@@ -168,6 +175,7 @@ window.addEventListener('click', (e) => {
 
 </body>
 </html>
+
 
 
 
