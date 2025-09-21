@@ -69,6 +69,7 @@ const logContainer = document.getElementById('logContainer');
 const logsDiv = document.getElementById('logs');
 
 const API_BASE = "https://e505e9c2cf26.ngrok-free.app";
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -95,9 +96,6 @@ form.addEventListener('submit', async (e) => {
     logsDiv.scrollTop = logsDiv.scrollHeight;
     return entry.querySelector('.loader');
   };
-
-  // ✅ Open the PDF tab immediately to avoid popup blocker
-  const pdfWindow = window.open("", "_blank");
 
   try {
     const loader1 = addLog("Logging in with roll number and password...");
@@ -126,8 +124,19 @@ form.addEventListener('submit', async (e) => {
       await new Promise(r => setTimeout(r, 1000));
       loader4.classList.replace('loader','checkmark');
 
-      // ✅ Set PDF URL in the tab
-      pdfWindow.location.href = `${API_BASE}${data.pdf_url}`;
+      // ✅ Fetch the PDF as a Blob
+      const fileResp = await fetch(`${API_BASE}${data.pdf_url}`);
+      const blob = await fileResp.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      // ✅ Create hidden <a> to trigger download
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "attendance.pdf"; // force download name
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
 
       const loader5 = addLog("Attendance fetched successfully!");
       loader5.classList.replace('loader','checkmark'); 
@@ -146,9 +155,6 @@ form.addEventListener('submit', async (e) => {
     console.error(err);
     errorDiv.textContent = err.message || "Server not reachable";
     errorDiv.style.display = "block";
-
-    // Close PDF tab if opened
-    if (pdfWindow) pdfWindow.close();
   } finally {
     setTimeout(() => form.classList.remove('slide-left'), 2000);
   }
@@ -163,8 +169,10 @@ window.addEventListener('click', (e) => {
 
 
 
+
 </body>
 </html>
+
 
 
 
