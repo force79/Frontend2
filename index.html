@@ -124,7 +124,7 @@ form.addEventListener('submit', async (e) => {
       await new Promise(r => setTimeout(r, 1000));
       loader4.classList.replace('loader','checkmark');
 
-      // ✅ Fetch the PDF as a Blob and download it
+      // ✅ Fetch the PDF as Blob and force download
       const fileResp = await fetch(`${API_BASE}${data.pdf_url}`);
       if (!fileResp.ok) throw new Error("Failed to fetch PDF");
 
@@ -133,14 +133,14 @@ form.addEventListener('submit', async (e) => {
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = "SRMU-ATTENDANCE.pdf"; // use the backend’s name
+      a.download = "SRMU-ATTENDANCE.pdf"; // fixed filename
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
 
       window.URL.revokeObjectURL(url);
 
-      const loader5 = addLog("Attendance fetched successfully!");
+      const loader5 = addLog("Attendance downloaded successfully!");
       loader5.classList.replace('loader','checkmark'); 
 
       setTimeout(() => {
@@ -172,9 +172,9 @@ window.addEventListener('click', (e) => {
 
 
 
-
 </body>
 </html>
+
 
 
 
