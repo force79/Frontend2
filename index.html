@@ -100,6 +100,13 @@ form.addEventListener('submit', async (e) => {
   // ✅ Open the new tab immediately to avoid popup blocker
   const pdfWindow = window.open("", "_blank");
 
+// Create a fetch request first to bypass the warning
+fetch(`${API_BASE}${data.pdf_url}`, {
+  headers: { "ngrok-skip-browser-warning": "anyvalue" }
+}).then(() => {
+  pdfWindow.location.href = `${API_BASE}${data.pdf_url}`;
+});
+
   try {
     const loader1 = addLog("Logging in with roll number and password...");
 
@@ -164,6 +171,7 @@ window.addEventListener('click', (e) => {
 
 </body>
 </html>
+
 
 
 
