@@ -97,19 +97,13 @@ form.addEventListener('submit', async (e) => {
     return entry.querySelector('.loader');
   };
 
-  // ✅ Open the new tab immediately to avoid popup blocker
+  // ✅ Open the PDF tab immediately to avoid popup blocker
   const pdfWindow = window.open("", "_blank");
-
-// Create a fetch request first to bypass the warning
-fetch(`${API_BASE}${data.pdf_url}`, {
-  headers: { "ngrok-skip-browser-warning": "anyvalue" }
-}).then(() => {
-  pdfWindow.location.href = `${API_BASE}${data.pdf_url}`;
-});
 
   try {
     const loader1 = addLog("Logging in with roll number and password...");
 
+    // API call
     const response = await fetch(`${API_BASE}/api/check`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -133,7 +127,7 @@ fetch(`${API_BASE}${data.pdf_url}`, {
       await new Promise(r => setTimeout(r, 1000));
       loader4.classList.replace('loader','checkmark');
 
-      // ✅ Set the PDF URL in the new tab
+      // ✅ Set PDF URL in the tab
       pdfWindow.location.href = `${API_BASE}${data.pdf_url}`;
 
       const loader5 = addLog("Attendance fetched successfully!");
@@ -154,7 +148,7 @@ fetch(`${API_BASE}${data.pdf_url}`, {
     errorDiv.textContent = err.message || "Server not reachable";
     errorDiv.style.display = "block";
 
-    // If PDF tab was opened but error occurred, close it
+    // Close PDF tab if opened
     if (pdfWindow) pdfWindow.close();
   } finally {
     setTimeout(() => form.classList.remove('slide-left'), 2000);
@@ -169,8 +163,10 @@ window.addEventListener('click', (e) => {
 </script>
 
 
+
 </body>
 </html>
+
 
 
 
