@@ -68,7 +68,7 @@ const errorDiv = document.getElementById('error');
 const logContainer = document.getElementById('logContainer');
 const logsDiv = document.getElementById('logs');
 
-const API_BASE = "https://51114b1b0342.ngrok-free.app";
+const API_BASE = "https://e505e9c2cf26.ngrok-free.app";
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -124,7 +124,7 @@ form.addEventListener('submit', async (e) => {
       await new Promise(r => setTimeout(r, 1000));
       loader4.classList.replace('loader','checkmark');
 
-      // ✅ Fetch the PDF as Blob and force download
+      // ✅ Fetch the PDF as a Blob and download it
       const fileResp = await fetch(`${API_BASE}${data.pdf_url}`);
       if (!fileResp.ok) throw new Error("Failed to fetch PDF");
 
@@ -133,14 +133,14 @@ form.addEventListener('submit', async (e) => {
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = "SRMU-ATTENDANCE.pdf"; // fixed filename
+      a.download = "SRMU-ATTENDANCE.pdf"; // use the backend’s name
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
 
       window.URL.revokeObjectURL(url);
 
-      const loader5 = addLog("Attendance downloaded successfully!");
+      const loader5 = addLog("Attendance fetched successfully!");
       loader5.classList.replace('loader','checkmark'); 
 
       setTimeout(() => {
@@ -172,8 +172,10 @@ window.addEventListener('click', (e) => {
 
 
 
+
 </body>
 </html>
+
 
 
 
