@@ -124,19 +124,14 @@ form.addEventListener('submit', async (e) => {
       await new Promise(r => setTimeout(r, 1000));
       loader4.classList.replace('loader','checkmark');
 
-      // ✅ Fetch the PDF as a Blob
-      const fileResp = await fetch(`${API_BASE}${data.pdf_url}`);
-      const blob = await fileResp.blob();
-      const url = window.URL.createObjectURL(blob);
-
-      // ✅ Create hidden <a> to trigger download
+      // ✅ Trigger download directly without opening new tab
       const a = document.createElement("a");
-      a.href = url;
-      a.download = "attendance.pdf"; // force download name
+      a.href = `${API_BASE}${data.pdf_url}`;
+      a.style.display = "none";
+      a.setAttribute("download", ""); // lets browser use original filename
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
 
       const loader5 = addLog("Attendance fetched successfully!");
       loader5.classList.replace('loader','checkmark'); 
@@ -170,8 +165,10 @@ window.addEventListener('click', (e) => {
 
 
 
+
 </body>
 </html>
+
 
 
 
