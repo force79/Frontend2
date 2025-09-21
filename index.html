@@ -68,6 +68,7 @@ const errorDiv = document.getElementById('error');
 const logContainer = document.getElementById('logContainer');
 const logsDiv = document.getElementById('logs');
 
+// ✅ Use your permanent domain
 const API_BASE = "https://srmu-attendance.site";
 
 form.addEventListener('submit', async (e) => {
@@ -100,7 +101,7 @@ form.addEventListener('submit', async (e) => {
   try {
     const loader1 = addLog("Logging in with roll number and password...");
 
-    // API call
+    // API call to check credentials
     const response = await fetch(`${API_BASE}/api/check`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -124,8 +125,10 @@ form.addEventListener('submit', async (e) => {
       await new Promise(r => setTimeout(r, 1000));
       loader4.classList.replace('loader','checkmark');
 
-      // ✅ Fetch the PDF as a Blob and download it
-      const fileResp = await fetch(`${API_BASE}${data.pdf_url}`);
+      // ✅ Fetch PDF and force download
+      const fileResp = await fetch(`${API_BASE}${encodeURI(data.pdf_url)}`, {
+        credentials: 'include' // optional if cookies/session are used
+      });
       if (!fileResp.ok) throw new Error("Failed to fetch PDF");
 
       const blob = await fileResp.blob();
@@ -133,14 +136,14 @@ form.addEventListener('submit', async (e) => {
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = "SRMU-ATTENDANCE.pdf"; // use the backend’s name
+      a.download = "SRMU-ATTENDANCE.pdf"; // fixed filename
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
 
       window.URL.revokeObjectURL(url);
 
-      const loader5 = addLog("Attendance fetched successfully!");
+      const loader5 = addLog("Attendance downloaded successfully!");
       loader5.classList.replace('loader','checkmark'); 
 
       setTimeout(() => {
@@ -171,10 +174,9 @@ window.addEventListener('click', (e) => {
 
 
 
-
-
 </body>
 </html>
+
 
 
 
