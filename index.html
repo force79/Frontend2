@@ -67,8 +67,9 @@ const closeBtn = document.querySelector('.close-btn');
 const errorDiv = document.getElementById('error');
 const logContainer = document.getElementById('logContainer');
 const logsDiv = document.getElementById('logs');
-const API_URL = "https://e505e9c2cf26.ngrok-free.app/api/check";
 
+// ✅ Use one constant name everywhere
+const API_BASE = "https://e505e9c2cf26.ngrok-free.app";
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -101,16 +102,17 @@ form.addEventListener('submit', async (e) => {
     // Step 1: Logging in
     const loader1 = addLog("Logging in with roll number and password...");
 
-    // API call immediately
+    // API call
     const response = await fetch(`${API_BASE}/api/check`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ roll_no: roll, password: pass, term: term })
     });
+
     const data = await response.json();
 
     if (data.status === "success" && data.pdf_url) {
-      loader1.classList.replace('loader','checkmark');
+      loader1.classList.replace('loader', 'checkmark');
 
       const loader2 = addLog("Opening student portal...");
       await new Promise(r => setTimeout(r, 1500));
@@ -124,19 +126,19 @@ form.addEventListener('submit', async (e) => {
       await new Promise(r => setTimeout(r, 1000));
       loader4.classList.replace('loader','checkmark');
 
+      // Open the generated PDF
       window.open(`${API_BASE}${data.pdf_url}`, "_blank");
+
       const loader5 = addLog("Attendance fetched successfully!");
       loader5.classList.replace('loader','checkmark'); 
 
-  setTimeout(() => {
-    form.reset();                 
-    form.classList.remove('slide-left'); 
-    
-    const logContainer = document.getElementById('logContainer'); 
-    if (logContainer) logContainer.remove(); 
-  }, 3000);
+      setTimeout(() => {
+        form.reset();                 
+        form.classList.remove('slide-left'); 
+        logContainer.style.display = 'none';
+      }, 3000);
     } else {
-      loader1.classList.replace('loader','checkmark');
+      loader1.classList.replace('loader','crossmark');
       addLog("Error: Invalid roll number or password!");
       throw new Error(data.message || "Invalid credentials");
     }
@@ -151,9 +153,13 @@ form.addEventListener('submit', async (e) => {
 
 // Popup close
 closeBtn.addEventListener('click', () => popup.style.display = 'none');
-window.addEventListener('click', (e) => { if (e.target === popup) popup.style.display = 'none'; });
+window.addEventListener('click', (e) => {
+  if (e.target === popup) popup.style.display = 'none';
+});
 </script>
+
 
 </body>
 </html>
+
 
